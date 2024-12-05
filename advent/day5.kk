@@ -4,7 +4,7 @@ import advent/input
 import odo/list
 
 fun parse()
-   val [pref, rest] = read-input("full", 5).split("\n\n")
+   val [pref, rest] = read-input(5).split("\n\n")
    val pairs = pref.split("\n").map fn(l) 
                   match l.split("|").map(fn(x) x.parse-int().unjust()) 
                     [x, y] -> (x, y) 
@@ -46,4 +46,5 @@ fun both-parts()
   println((totalGood, totalBad))
 
 pub fun main()
+  with input-full
   both-parts()
