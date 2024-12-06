@@ -13,7 +13,7 @@ struct lab
    rows: list<string>
    obst-vec: vector<bool>
 
-fun show(Lab(start, rows)): string
+fun show(^Lab(start, rows)): string
     "Lab( " ++ start.show() ++ ", " ++ rows.show() ++ " )"
 
 fun read-lab()
@@ -28,29 +28,27 @@ fun read-lab()
     Lab(start, (n, m), lines, obst-vec)
 
 
-fun traverse-lab(^Lab((sx, sy), (n, m), _, obst), ret: bool = True)
-    val dirs = [(0, 1), (1, 0), (0, -1), (-1, 0)].vector()
-    run
-        val visited = vector-init(n, fn (_) vector-init(m, fn (_) ref(0.int32())))
-        fun go(x: int, y: int, dir)
-            val (dx, dy) = dirs[dir]
-            val nx = x + dx
-            val ny = y + dy
-            if nx < 0 || nx >= n || ny < 0 || ny >= m then return True
-            if obst[nx * m + ny] then go(x, y, (dir + 1) % 4)
-            else
-                val v = !visited[nx][ny]
-                val d = one.shl(dir)
-                if v.and(d) != zero then return False
-                visited[nx][ny].set(v.or(d))
-                go(nx, ny, dir)
-        visited[sx][sy].set(one.shl(3))
-        val exited = go(sx, sy, 3)
-        val vis = if ret then visited.map fn(row) row.map fn (r) !r != zero else unit/vector()
-        (exited, vis)
+fun traverse-lab(^Lab((sx, sy), (n, m), _, obst), ^ret: bool = True)
+    var visited := vector(n * m, zero)
+    fun go(x, y, dx: int, dy: int, dir)
+        val nx = x + dx
+        val ny = y + dy
+        if nx < 0 || nx >= n || ny < 0 || ny >= m then return True
+        if obst[nx * m + ny] then go(x, y, ~dy, ~dx, (dir + 1) % 4)
+        else
+            val v = visited[nx * m + ny]
+            val d = one.shl(dir)
+            if v.and(d) != zero then return False
+            visited[nx * m + ny] := v.or(d)
+            go(nx, ny, dx, dy, dir)
+    visited[sx * m + sy] := one
+    val exited = go(sx, sy, -1, 0, 0)
+    val vis = if !ret then unit/vector() else 
+        vector-init(n) fn (i) vector-init(m) fn(j) visited[i * m + j] != zero
+    (exited, vis)
 
  
-fun combine(rows: list<string>, visited: vector<vector<bool>>)
+fun combine(^rows: list<string>, ^visited: vector<vector<bool>>)
     rows
         .zipwith(visited.list()) fn(row, vr)
             row.list()
@@ -71,7 +69,7 @@ fun part1()
 fun part2()
     val lab as Lab(start = (sx, sy), size = (n, m)) = read-lab()
     val (_, v) = traverse-lab(lab)
-    val count = run
+    val count = 
         var ovm := lab.obst-vec
         var count := 0
         for(0, n - 1) fn(i) 
@@ -89,3 +87,23 @@ pub fun main()
   println(one.shl(0))
   with input-full
   part2()
+
+
+fun check()
+    var x := vector(5, 0)
+    x[0] := 1
+    x[1] := 2
+    x
+
+// fun check1()
+//     var x := vector(5, vector(5, 0))
+//     x[0][0] := 1
+//     x
+
+fun check2() 
+    var x := vector(5, vector(5, 0))
+    var x0 := x[0]
+    x[0] := unit/vector()
+    x0[0] := 1
+    x[0] := x0
+    x
