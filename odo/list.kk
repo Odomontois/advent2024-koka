@@ -1,16 +1,18 @@
 module odo/list
 
-fun merge(xs: list<a>, ys: list<a>, less: (a, a) -> bool): list<a>
+import std/core/undiv
+
+fun merge(xs: list<a>, ys: list<a>, ?less: (a, a) -> e bool): e list<a>
     match xs
         Nil -> ys
         Cons(x, xrest) -> match ys
             Nil -> xs
             Cons(y, yrest) ->                 
                 if less(x, y) 
-                then Cons(x, merge(xrest, ys, less))
-                else Cons(y, merge(xs, yrest, less))
+                then Cons(x, merge(xrest, ys))
+                else Cons(y, merge(xs, yrest))
 
-pub fun merge-sort(xs: list<a>, less: (a, a) -> bool): <div> list<a>
+fun merge-sort-it(xs: list<a>, ?less: (a, a) -> e bool): e list<a>
     match xs
         Nil -> Nil
         Cons(_, Nil) -> xs
@@ -18,7 +20,13 @@ pub fun merge-sort(xs: list<a>, less: (a, a) -> bool): <div> list<a>
             val mid = xs.length / 2
             val left = xs.take(mid)
             val right = xs.drop(mid)
-            merge(merge-sort(left, less), merge-sort(right, less), less)
+            merge(merge-sort-it(left.pretend-decreasing), merge-sort-it(right.pretend-decreasing))
+
+pub fun merge-sort-with(xs: list<a>, less: (a, a) -> e bool): e list<a>
+    merge-sort-it(xs)
+
+pub fun merge-sort(xs: list<a>, ?cmp: (a, a) -> e order): e list<a>
+    merge-sort-it(xs, fn(x, y) cmp(x, y) == Lt)
 
 pub fun transpose(xs: list<list<a>>): list<list<a>>
     match xs 
@@ -29,8 +37,11 @@ pub fun transpose(xs: list<list<a>>): list<list<a>>
 pub fun at(xs: list<a>, i: int): maybe<a>
     xs.drop(i).head()
 
-pub fun flatmap(b: maybe<a>, f: a -> maybe<b>): maybe<b>
-    match b
-        Just(x) -> f(x)
-        Nothing -> Nothing
+pub fun find-indexed-maybe(l: list<a>, p: (int, a) -> e maybe<b>): e maybe<b>
+    fun go(i, xs) match xs
+        Nil -> Nothing  
+        Cons(x, xs) -> match p(i, x)
+            Nothing -> go(i + 1, xs)
+            jy -> jy
+    go(0, l)
     

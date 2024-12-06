@@ -4,8 +4,8 @@ import advent/input
 import odo/list
 
 
-fun part1(input: list<list<int>>)
-    val x = input.transpose().map(fn(l) l.merge-sort(fn (x, y) x < y))
+fun part1(input: list<list<int>>): int
+    val x = input.transpose().map(fn(l) l.merge-sort())
     match x 
         [l1, l2] -> (l1.zipwith(l2) fn (a, b) (a - b).abs()).sum()
         _ -> -1
