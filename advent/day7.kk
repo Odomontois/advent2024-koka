@@ -47,9 +47,6 @@ fun part2()
     val lines = input7()
     val good = lines.filter-map fn ((t, nums))
         if nums.search2(0, t) then Just(t) else Nothing
-
-    println(lines)
-    println(good)
     println(good.sum)
 
 pub fun main()
