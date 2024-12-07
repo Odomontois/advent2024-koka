@@ -95,11 +95,6 @@ fun check()
     x[1] := 2
     x
 
-// fun check1()
-//     var x := vector(5, vector(5, 0))
-//     x[0][0] := 1
-//     x
-
 fun check2() 
     var x := vector(5, vector(5, 0))
     var x0 := x[0]

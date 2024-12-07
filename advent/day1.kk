@@ -11,7 +11,7 @@ fun part1(input: list<list<int>>): int
         _ -> -1
 
 pub fun main()
-  with input-base
+  with input-sample
   val input = read-input(1)
   val pairs = input
                 .split("\n")

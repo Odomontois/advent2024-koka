@@ -8,8 +8,8 @@ pub fun read-input(day: int) : <io, input>  string
 
 pub effect fun input(): string
 
-pub val input-base = handler
-  fun input() "base"
+pub val input-sample = handler
+  fun input() "sample"
 
 pub val input-full = handler
   fun input() "full"
