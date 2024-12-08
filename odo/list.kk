@@ -44,4 +44,27 @@ pub fun find-indexed-maybe(l: list<a>, p: (int, a) -> e maybe<b>): e maybe<b>
             Nothing -> go(i + 1, xs)
             jy -> jy
     go(0, l)
+
+pub fun dedup(xs: list<a>, ?(==): (a, a) -> e bool): e list<a>
+    match xs
+        Nil -> Nil
+        Cons(x, xs) -> xs.dedup-prev(x)
+
+fun dedup-prev(xs: list<a>, prev: a, ?(==): (a, a) -> e bool): e list<a>
+    match xs
+        Nil -> Cons(prev, Nil)
+        Cons(x, xs) -> 
+            if prev == x 
+            then xs.dedup-prev(prev)
+            else Cons(prev, xs.dedup-prev(x))
+
+pub fun flatmap-index(xs: list<a>, f: (int, a) -> e list<b>): e list<b>
+  fun flatmap-pre( ys, zs, i )
+    match ys
+      Cons(y,yy) -> Cons(y,flatmap-pre(yy,zs, i))
+      Nil -> match zs
+        Cons(z,zz) -> flatmap-pre(f(i, z),zz, i+1)
+        Nil -> Nil
+  flatmap-pre([],xs,0)
+
     
