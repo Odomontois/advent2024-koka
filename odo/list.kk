@@ -67,4 +67,12 @@ pub fun flatmap-index(xs: list<a>, f: (int, a) -> e list<b>): e list<b>
         Nil -> Nil
   flatmap-pre([],xs,0)
 
+pub fun insert(xs: list<a>, x: a, ?cmp: (a, a) -> e order): e list<a>
+    match xs
+        Nil -> Cons(x, Nil)
+        Cons(y, ys) -> 
+            if cmp(x, y) == Lt
+            then Cons(x, xs)
+            else Cons(y, ys.insert(x))
+
     
