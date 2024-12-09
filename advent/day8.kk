@@ -50,7 +50,7 @@ fun trues(v: vector<bool>): int
 fun solve(f) read-day8().antennas(f)
 
 fun part1()
-    solve fn(x1, y1, x2, y2) if mark(2 * x2 - x1, 2 * y2 - y1) then ()
+    solve fn(x1, y1, x2, y2) mark(2 * x2 - x1, 2 * y2 - y1).ignore
     
 fun part2()
     solve fn (x1, y1, x2, y2)
