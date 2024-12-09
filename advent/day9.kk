@@ -1,6 +1,7 @@
 module advent/day9
 
 import advent/input
+import odo/list
 
 struct file
     fid: int
@@ -10,8 +11,8 @@ struct file
 
 fun file/empty(space = 0) File(-1, 0, space, 0)
 
-fun show(File(fid, length, space)): string
-    "{fid: " ++ fid.show ++ " length: " ++ length.show ++ " space: " ++ space.show ++ "}"
+fun file/show(f: file): string
+    "{fid: " ++ f.fid.show ++ " length: " ++ f.length.show ++ " space: " ++ f.space.show ++ " pos: " ++ f.pos.show ++ "}"
 
 fun files(s: string)
     fun undig(c: char) c.int - '0'.int
@@ -48,44 +49,38 @@ fun part1()
 
 fun dispense(fs: list<file>)
     var xs := vector(10, Nil)        
-    fs.foreach fn(f as File(length = i)) 
-        xs[i] := Cons(f, xs[i])
+    fs.foreach fn(File(space = sp, pos = pos, length = sz)) 
+        if sp > 0 then  xs[sp] := Cons(pos + sz, xs[sp])
     xs
 
 fun defragment(fs: list<file>)
-    var disp := fs.dispense
-    var moved := vector(fs.length, False)
+    val fsr = fs.reverse
+    var disp := fsr.dispense
     
-    fun find(size, cur = 0, best = Nothing): _ maybe<int>
-        if cur > size then return best.map fn ((i, _)) i
+    fun find(cur, best = Nothing): _ maybe<int>
+        if cur == 10 then return best.map fn ((i, _)) i
         val next = match disp[cur]
-            Cons(File(fid), _) -> match best
-                Just((_, bid)) | bid > fid -> best
-                _                          -> Just((cur, fid))
+            Cons(pos, _) -> match best
+                Just((_, q)) | q < pos -> best
+                _                      -> Just((cur, pos))
             _ -> best
-        find(size, cur + 1, next)
+        find(cur + 1, next)
 
-    fun spaceFill(space) match find(space)
-            Nothing ->
-                [file/empty()]
-            Just(i) -> match disp[i]
-                Cons(f as File(fid = fid, length = l), rest) -> 
-                    disp[i] := rest
-                    moved[fid] := True
-                    Cons(f(space = 0), spaceFill(space - l))
-                _ -> [file/empty()]
+    fun place(f: file) match find(f.length)
+            Nothing -> f
+            Just(sp) -> match disp[sp]
+                Cons(p, rest) | p < f.pos -> 
+                    disp[sp] := rest
+                    val remain = sp - f.length
+                    if remain > 0 then disp[remain] := disp[remain].insert(p + f.length)
+                    f(pos = p)
+                _ -> f
 
-    fs.flatmap fn(f)
-        trace-show(f)
-        if moved[f.fid] 
-        then [empty(f.length)]
-        else Cons(f(space=0), spaceFill(f.space))
+    fs.reverse.map(place).merge-sort-with fn (f1, f2) f1.pos < f2.pos
 
 fun part2()
-    read-input(9).files.defragment.flatmap fn (File(fid, length, space)) 
-            fid.show.replicate(length) ++ ".".replicate(space)  
-    .join
+    read-input(9).files.defragment.checksum
 
 pub fun main()
     with input-full
-    part1()
+    part2()
