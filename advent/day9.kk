@@ -34,14 +34,53 @@ fun fill-bck(fw, bk, sp) match bk
 fun fill(ls) fill-fwd(ls, ls.reverse)
 
 fun checksum(ls) 
-    ls.foldl((0, 0)) fn((sum, pos), File(fid, sz, _)) 
+    ls.foldl((0, 0)) fn((sum, pos), File(fid, sz, sp)) 
         val chck = fid * (sz * pos +  sz * (sz - 1) / 2)
-        (sum + chck, pos + sz)
-
+        (sum + chck, pos + sz + sp)
 
 fun part1()
     read-input(9).files.fill.checksum
 
+fun dispense(fs: list<file>)
+    var xs := vector(10, Nil)        
+    fs.foreach fn(f as File(length = i)) 
+        xs[i] := Cons(f, xs[i])
+    xs
+
+fun defragment(fs: list<file>)
+    var disp := fs.dispense
+    var moved := vector(fs.length, False)
+    
+    fun find(size, cur = 0, best = Nothing): _ maybe<int>
+        if cur > size then return best.map fn ((i, _)) i
+        val next = match disp[cur]
+            Cons(File(fid), _) -> match best
+                Just((_, bid)) | bid > fid -> best
+                _                          -> Just((cur, fid))
+            _ -> best
+        find(size, cur + 1, next)
+
+    fun spaceFill(space) match find(space)
+            Nothing ->
+                [File(-1, 0, space)]
+            Just(i) -> match disp[i]
+                Cons(f as File(fid = fid, length = l), rest) -> 
+                    disp[i] := rest
+                    moved[fid] := True
+                    Cons(f(space = 0), spaceFill(space - l))
+                _ -> [File(-1, 0, space)]
+
+    fs.flatmap fn(f)
+        trace-show(f)
+        if moved[f.fid] 
+        then [File(-1, 0, space = f.length)]
+        else Cons(f(space=0), spaceFill(f.space))
+
+fun part2()
+    read-input(9).files.defragment.flatmap fn (File(fid, length, space)) 
+            fid.show.replicate(length) ++ ".".replicate(space)  
+    .join
+
 pub fun main()
-    with input-full
-    part1()
+    with input-sample
+    part2()
