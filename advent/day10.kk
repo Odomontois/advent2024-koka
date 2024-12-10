@@ -4,11 +4,10 @@ import advent/input
 import odo/list
 
 pub fun read-map() read-input(10).split("\n").vector().map fn(x) x.vector()
-pub fun part1()
-    val tm = read-map()
+
+pub fun count(tm: vector<vector<char>>, single: int -> a, empty: a, combine: (a, a) -> a, res: a -> int): _ int
     val n = tm.length
-    println(tm.list.foldl(0) fn(s, x) x.list.foldl(s) fn (s, x) if x == '9' then s + 1 else s)
-    var score := vector(n * n, Nil)
+    var score := vector(n * n, empty)
     var total := 0
     for(10) fn(u)
         val c = ('9'.int - u).char
@@ -17,22 +16,25 @@ pub fun part1()
             for(n) fn(j)
                 if tm[i][j] != c return ()
                 val k = i * n + j
-                val s = if u == 0 then [k] else 
+                val s = if u == 0 then single(k) else 
                     val neighbors = [(i - 1, j), (i + 1, j), (i, j - 1), (i, j + 1)]
-                    neighbors.foldl([]) fn(s, (x, y))
+                    neighbors.foldl(empty) fn(s, (x, y))
                         if x >= 0 && x < n && y >= 0 && y < n && tm[x][y] == c1 
-                        then s.union(score[x * n + y])
+                        then s.combine(score[x * n + y])
                         else s
                 score[i * n + j] := s
-                if u == 9 then total := total + s.length
-    println(total)
-    // list(0, n - 1).map fn(i)
-    //     list(0, n - 1).map fn(j)
-    //         score[i * n + j]
+                if u == 9 then total := total + res(s)
+    total
+
+fun part1()
+    read-map().count(fn (x) [x], [], fn(x, y) x.union(y), length)
+
+fun part2()
+    read-map().count(fn (_) 1, 0, (+), fn(x) x)
                
                 
 
 
 pub fun main()
     with input-full
-    part1()
+    part2()
