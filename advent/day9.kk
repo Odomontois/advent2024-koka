@@ -3,7 +3,7 @@ module advent/day9
 import advent/input
 import odo/list
 
-struct file
+value struct file
     fid: int
     length: int
     space: int

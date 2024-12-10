@@ -59,7 +59,7 @@ fun dedup-prev(xs: list<a>, prev: a, ?(==): (a, a) -> e bool): e list<a>
             else Cons(prev, xs.dedup-prev(x))
 
 pub fun flatmap-index(xs: list<a>, f: (int, a) -> e list<b>): e list<b>
-  fun flatmap-pre( ys, zs, i )
+  fun flatmap-pre(ys, zs, i )
     match ys
       Cons(y,yy) -> Cons(y,flatmap-pre(yy,zs, i))
       Nil -> match zs
@@ -74,5 +74,17 @@ pub fun insert(xs: list<a>, x: a, ?cmp: (a, a) -> e order): e list<a>
             if cmp(x, y) == Lt
             then Cons(x, xs)
             else Cons(y, ys.insert(x))
+
+pub fun union(xs: list<a>, ys: list<a>, ?cmp: (a, a) -> e order): e list<a>
+    match xs
+        Nil -> ys
+        Cons(x, xs') -> 
+            match ys 
+                Nil -> xs
+                Cons(y, ys') -> 
+                    match cmp(x, y)
+                        Lt -> Cons(x, xs'.union(ys))
+                        Eq -> Cons(x, xs'.union(ys'))
+                        Gt -> Cons(y, xs.union(ys'))
 
     
