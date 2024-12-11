@@ -75,7 +75,7 @@ pub fun insert(xs: list<a>, x: a, ?cmp: (a, a) -> e order): e list<a>
             then Cons(x, xs)
             else Cons(y, ys.insert(x))
 
-pub fbip fun union'(xs: list<a>, ys: list<a>, ?order2: (a, a) -> e order2<a>): e list<a>
+pub fbip fun union'(xs: list<a>, ys: list<a>, ^?order2: (a, a) -> e order2<a>): e list<a>
     match xs
         Nil -> ys
         Cons(x, xs') -> match ys 
@@ -86,7 +86,7 @@ pub fbip fun union'(xs: list<a>, ys: list<a>, ?order2: (a, a) -> e order2<a>): e
                 Gt2(y', x') -> Cons(y', Cons(x', xs').pretend-decreasing.union'(ys'))
 
 
-pub fun union(xs: list<a>, ys: list<a>, ?cmp: (a, a) -> e order): e list<a>
+pub fun union(xs: list<a>, ys: list<a>, ^?cmp: (a, a) -> e order): e list<a>
     match xs
         Nil -> ys
         Cons(x, xs') ->  match ys 
@@ -95,6 +95,14 @@ pub fun union(xs: list<a>, ys: list<a>, ?cmp: (a, a) -> e order): e list<a>
                 Lt -> Cons(x, xs'.union(ys))
                 Eq -> Cons(x, xs'.union(ys'))
                 Gt -> Cons(y, xs.union(ys'))
+
+pub fip(1) fun union-single(xs: list<a>, y: a, ^?order2: (a, a) -> e order2<a>): e list<a>
+    match xs
+        Nil -> Cons(y, Nil)
+        Cons(x, xs') -> match order2(x, y)
+            Lt2(x', y') -> Cons(x', xs'.union-single(y'))
+            Eq2(x') -> Cons(x', xs')
+            Gt2(y', x') -> Cons(y', Cons(x', xs'))
 
 
     
