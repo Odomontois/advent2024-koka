@@ -10,6 +10,8 @@ struct machine
     button-b: pair
     prize: pair
 
+fun grow-prize(m as Machine(prize = (px, py)), add = 10000000000000) m(prize = (px + add, py + add))
+
 fun show(Machine(a, b, p): machine) "Machine( button-a: " ++ a.show ++ ", button-b: " ++ b.show ++ ", prize: " ++ p.show ++ " )"
 
 fun parse-pair(line)
@@ -52,4 +54,6 @@ fun solve-machine(Machine((ax, ay), (bx, by), (px, py)))
 
 pub fun main()
     with input-full
-    parse-machines().filter-map(solve-machine).sum
+    val machines = parse-machines()
+    println(machines.filter-map(solve-machine).sum)
+    println(machines.filter-map(fn(m) m.grow-prize.solve-machine).sum)
