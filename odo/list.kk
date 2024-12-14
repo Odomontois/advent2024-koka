@@ -75,6 +75,14 @@ pub fun insert(xs: list<a>, x: a, ?cmp: (a, a) -> e order): e list<a>
             then Cons(x, xs)
             else Cons(y, ys.insert(x))
 
+pub fbip fun update(xs: list<(a, w)>, x: a, ^f: w -> e w, ^?order2: (a, a) -> e order2<a>): e list<(a, w)>
+    match xs
+        Nil -> Nil
+        Cons((y, w), xs') -> match order2(x, y) 
+            Lt2(_, y') -> Cons((y', w), xs')
+            Eq2(y') -> Cons((y', f(w)), xs')
+            Gt2(x', y') -> Cons((y', w), xs'.update(x', f))
+
 pub fbip fun union'(xs: list<a>, ys: list<a>, ^?order2: (a, a) -> e order2<a>): e list<a>
     match xs
         Nil -> ys
