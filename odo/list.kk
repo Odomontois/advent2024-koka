@@ -112,5 +112,7 @@ pub fip(1) fun union-single(xs: list<a>, y: a, ^?order2: (a, a) -> e order2<a>):
             Eq2(x') -> Cons(x', xs')
             Gt2(y', x') -> Cons(y', Cons(x', xs'))
 
+pub fun collect (xs: list<a>, f: a -> <exn| e> b): e list<b>
+    xs.filter-map fn(x) try(fn() Just(f(x))) fn(_) Nothing
 
     

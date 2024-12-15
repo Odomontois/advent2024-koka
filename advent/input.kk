@@ -3,13 +3,21 @@ module advent/input
 import std/os/file
 import std/os/path
 
-pub fun read-input(day: int) : <io, input>  string
-  read-text-file(cwd() / "input" / input() / ("day" ++ day.show()))
+pub type input-kind
+    Sample
+    Full
 
-pub effect fun input(): string
+fun show(i) match i
+    Sample -> "sample"
+    Full -> "full"
+
+pub fun read-input(day: int) : <io, input>  string
+  read-text-file(cwd() / "input" / input().show / ("day" ++ day.show()))
+
+pub effect fun input(): input-kind
 
 pub val input-sample = handler
-  fun input() "sample"
+  fun input() Sample
 
 pub val input-full = handler
-  fun input() "full"
+  fun input() Full
