@@ -3,6 +3,7 @@ module advent/day15
 import advent/input
 import odo/list
 import odo/queue
+import std/os/readline
 
 type direction
     U
@@ -20,6 +21,8 @@ type cell
     Empty
     Wall
     Bx
+    LSide
+    RSide
 
 fun cell/(==)(c1, c2) match (c1, c2)
     (Empty, Empty) -> True
@@ -32,10 +35,12 @@ alias point = (int, int)
 fun idx((x, y), ?dim: int): int
     y * dim + x
 
-fun cell/show(c) match c
-    Empty -> " "
+fun cell/show(c): string match c
+    Empty -> "·"
     Wall -> "▓"
     Bx -> "▢"
+    LSide -> "◨"
+    RSide -> "◧"
 
 struct grid
     dim: int
@@ -70,6 +75,8 @@ fun read-data()
                 '.' -> Empty
                 '#' -> Wall
                 'O' -> Bx
+                '[' -> LSide
+                ']' -> RSide
                 '@' -> 
                     grid-start := (x, y)
                     Empty
@@ -94,6 +101,9 @@ fun move-cell(data: vector<cell>, from: point, to: point, ?dim: int): _ vector<c
 fun point/(+)((x, y), (dx, dy)): point
     (x + dx, y + dy)
 
+val to-left = (-1, 0)
+val to-right = (1, 0)
+
 fun move(Grid(dim, pos, data), c: direction): _ grid
     val d = match c
         U -> (0, -1)
@@ -104,39 +114,98 @@ fun move(Grid(dim, pos, data), c: direction): _ grid
     var data' := data
     val next = pos + d
 
-    fun move-boxes(ms: queue<point>, acc: list<point>): _ maybe<list<point>>
-        match ms.dequeue
-            Nothing -> Just(acc)
-            Just((m, qs')) -> match data'[m.idx]
-                Wall -> return Nothing
-                Bx -> move-boxes(qs'.enqueue(m + d), Cons(m, acc))
-                Empty -> move-boxes(qs', acc)
+    var moved := vector(dim * dim, False)
+    var saved := vector(dim * dim, False)
 
-    match move-boxes(queue([next]), Nil)
-        Nothing -> return Grid(dim, pos, data')
-        Just(ms) ->
-            ms.foreach fn(m)
+    var ms := queue([next])
+    var save-acc := Nil
+
+    fun put(m)
+        if moved[m.idx] then return ()
+        moved[m.idx] := True
+        ms := ms.enqueue(m)
+
+    fun pop()
+        match ms.dequeue
+            Just((m, ms')) -> 
+                ms := ms'
+                Just(m)
+            Nothing -> Nothing
+
+    fun save(m)
+        if saved[m.idx] then return ()
+        saved[m.idx] := True
+        save-acc := Cons(m, save-acc)
+
+    fun move-boxes(): _ bool
+        match pop()
+            Nothing -> True
+            Just(m) -> 
+                match data'[m.idx]
+                    Wall -> return False
+                    Bx    -> 
+                        put(m + d)
+                        save(m)
+                    LSide -> 
+                        if d.fst == 0  
+                            then   
+                                put(m + d + to-right)
+                                put(m + d) 
+                            else put(m + d + d)
+                        save(m)
+                        save(m + to-right)
+                    RSide -> 
+                        if d.fst == 0  
+                            then 
+                                put(m + d + to-left)
+                                put(m + d) 
+                            else put(m + d + d)
+                        save(m)
+                        save(m + to-left)
+                    Empty -> ()
+                move-boxes()
+
+    if move-boxes() then
+            save-acc.foreach fn(m)
                 data' := data'.move-cell(m, m + d)
+            Grid(dim, next, data')
+    else Grid(dim, pos, data')
     
-    Grid(dim, next, data')
+    
 
 fun gps-sum(Grid(dim, _, data)): int
     var sum := 0
     data.foreach-indexed fn(i, c)
         val (x, y) = (i % dim, i / dim)
-        match c 
-            Bx -> sum := sum + x + y * 100
-            _ -> ()
+        val is-box = match c 
+            Bx -> True
+            LSide -> True
+            _ -> False
+        if is-box then sum := sum + x + y * 100
     sum
 
-fun part1()
+fun stretch(Grid(dim, (x, y), data))
+    val data' = data.list.flatmap fn(c) match c
+        Bx -> [LSide, RSide]
+        c -> [c, c]
+    .vector
+    Grid(dim * 2, (x * 2, y), data')
+
+fun solve(f: grid -> grid = id)
     val Input15(grid, commands) = read-data()
-    commands.foldl(grid) fn(g, c) 
+    val res = commands.foldl(f(grid)) fn(g, c) 
         // println(g)
         // println(c)
+        // readline().ignore
         g.move(c)
-    .gps-sum   
+    println(res)
+    res.gps-sum    
+
+fun part1() solve()
+
+fun part2() solve(stretch)
+
 
 pub fun main()
     with input-full
-    part1()
+    part2()
