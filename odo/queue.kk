@@ -1,6 +1,6 @@
-module queue
+module odo/queue
 
-value struct queue<a>
+pub value struct queue<a>
     front : list<a>
     back : list<a>
 
