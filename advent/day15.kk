@@ -114,15 +114,15 @@ fun move(Grid(dim, pos, data), c: direction): _ grid
     var data' := data
     val next = pos + d
 
-    var moved := vector(dim * dim, False)
+    var seen := vector(dim * dim, False)
     var saved := vector(dim * dim, False)
 
     var ms := queue([next])
     var save-acc := Nil
 
     fun put(m)
-        if moved[m.idx] then return ()
-        moved[m.idx] := True
+        if seen[m.idx] then return ()
+        seen[m.idx] := True
         ms := ms.enqueue(m)
 
     fun pop()
@@ -137,33 +137,20 @@ fun move(Grid(dim, pos, data), c: direction): _ grid
         saved[m.idx] := True
         save-acc := Cons(m, save-acc)
 
-    fun move-boxes(): _ bool
-        match pop()
-            Nothing -> True
-            Just(m) -> 
-                match data'[m.idx]
-                    Wall -> return False
-                    Bx    -> 
-                        put(m + d)
-                        save(m)
-                    LSide -> 
-                        if d.fst == 0  
-                            then   
-                                put(m + d + to-right)
-                                put(m + d) 
-                            else put(m + d + d)
-                        save(m)
-                        save(m + to-right)
-                    RSide -> 
-                        if d.fst == 0  
-                            then 
-                                put(m + d + to-left)
-                                put(m + d) 
-                            else put(m + d + d)
-                        save(m)
-                        save(m + to-left)
-                    Empty -> ()
-                move-boxes()
+    fun move-boxes(): _ bool match pop()
+        Nothing -> True
+        Just(m) -> 
+            match data'[m.idx]
+                Wall -> return False
+                Empty -> 
+                    return move-boxes()
+                    ()
+                Bx    -> ()
+                LSide -> put(m + to-right)
+                RSide -> put(m + to-left)
+            put(m + d) 
+            save(m)
+            move-boxes()
 
     if move-boxes() then
             save-acc.foreach fn(m)
@@ -193,12 +180,7 @@ fun stretch(Grid(dim, (x, y), data))
 
 fun solve(f: grid -> grid = id)
     val Input15(grid, commands) = read-data()
-    val res = commands.foldl(f(grid)) fn(g, c) 
-        // println(g)
-        // println(c)
-        // readline().ignore
-        g.move(c)
-    println(res)
+    val res = commands.foldl(f(grid), move)
     res.gps-sum    
 
 fun part1() solve()
