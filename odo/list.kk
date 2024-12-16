@@ -75,6 +75,14 @@ pub fun insert(xs: list<a>, x: a, ?cmp: (a, a) -> e order): e list<a>
             then Cons(x, xs)
             else Cons(y, ys.insert(x))
 
+pub fun insert-with(xs: list<a>, x: a, ^?key: a -> b, ^?cmp: (b, b) -> e order): e list<a>
+    match xs
+        Nil -> Cons(x, Nil)
+        Cons(y, ys) -> 
+            if cmp(key(x), key(y)) == Lt
+            then Cons(x, Cons(y, ys))
+            else Cons(y, ys.insert-with(x))
+
 pub fbip fun update(xs: list<(a, w)>, x: a, ^f: w -> e w, ^?order2: (a, a) -> e order2<a>): e list<(a, w)>
     match xs
         Nil -> Nil
