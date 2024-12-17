@@ -3,6 +3,7 @@ module advent/day16
 import advent/input
 import odo/list
 import odo/queue
+import odo/heap
 
 alias race-map = vector<vector<char>>
 
@@ -29,6 +30,9 @@ fun small-key(Item(x, y, _, _), ?dim: int): total int
 
 fun cmp(i1, i2): order 
     i1.cost.cmp(i2.cost)
+
+fun show(i: item): string
+    "Item{" ++ i.x.show ++ ", " ++ i.y.show ++ ", " ++ i.dir.show ++ ", " ++ i.cost.show ++ "}"
 
 fun direct(d) match d
     0 -> (-1, 0)
@@ -86,7 +90,7 @@ fun solve(m: race-map)
     go([Item(sx, sy, dir = 3, cost = 0)])
     val ends = list(0, 3).map(fn(d) Item(ex, ey, d, 0)).filter(fn(i) best[i.key] == end-cost)
     val count = go-back(queue(ends))
-
+    end-cost
     (end-cost, count)
 
 fun part1()
