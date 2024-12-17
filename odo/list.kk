@@ -123,4 +123,14 @@ pub fip(1) fun union-single(xs: list<a>, y: a, ^?order2: (a, a) -> e order2<a>):
 pub fun collect (xs: list<a>, f: a -> <exn| e> b): e list<b>
     xs.filter-map fn(x) try(fn() Just(f(x))) fn(_) Nothing
 
+pub fun chunks(xs: list<a>, n: int): list<list<a>> match xs
+    Nil -> Nil
+    _ -> 
+        val (chunk, rest) = xs.split(n)
+        Cons(chunk, rest.pretend-decreasing.chunks(n))
+
+pub fbip fun chunks2(xs: list<a>): list<(a, a)> match xs
+    Cons(a, Cons(b, xs')) -> Cons((a, b), xs'.chunks2)
+    _ -> Nil
+
     

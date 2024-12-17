@@ -35,7 +35,7 @@ fun fix-down(h: heap<a>, c: ctx<heap<a>> = ctx _, ^?cmp: (a, a) -> order) : heap
     match h
         Empty -> c ++. Empty
         Single(x) -> c ++. Single(x)
-        Bin(x, k, l, r) -> Empty
+        Bin() -> Empty
             
 
 fun min(^l: heap<a>): maybe<a> match l
