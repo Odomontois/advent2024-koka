@@ -7,11 +7,11 @@ import odo/queue
 fun read-pairs() read-input(18).split("\n").map fn(l) 
     l.split(",").filter-map(fn(x) x.parse-int).list-pair
 
-fun part1()
+fun solve(limit)
     val pairs = read-pairs()
     val dim = map-size()
     var m := vector(dim * dim, False)
-    foreach(pairs.take(fall-limit())) fn ((x, y)) m[x * dim + y] := True
+    foreach(pairs.take(limit)) fn ((x, y)) m[x * dim + y] := True
     var q := queue([(0, 0, 0)])
     fun go() match q.dequeue()
         Nothing -> Nothing
@@ -26,6 +26,18 @@ fun part1()
                 go()
     go()
 
+fun part1() 
+    solve(match input()
+        Sample -> 12
+        Full -> 1024
+    )
+
+fun part2()
+    val ps = read-pairs()
+    val n = ps.length
+    for-while(1, n) fn(lim)
+        if solve(lim).is-nothing() then ps[lim - 1] else Nothing
+
 fun map-size() match input()
     Sample -> 7
     Full -> 71
@@ -36,4 +48,4 @@ fun fall-limit() match input()
 
 pub fun main()
     with input-full
-    part1()
+    part2()
