@@ -71,11 +71,11 @@ fun merge(i, j): _ unit
         uf-set(a, si + sj + 1)
         uf-set(b, ~a)
 
-fun run-union-find(n, f : () -> <union-find | e> x): e x
+fun run-union-find(n, f : () -> <union-find, exn | e> x): <exn|e> x
     var uf := vector(n, 1)
     with handler
-        fun uf-get(i) try(fn() uf[i]) fn(_) i  
-        fun uf-set(i, v) try(fn() uf[i] := v) fn(_) ()
+        fun uf-get(i) uf[i]
+        fun uf-set(i, v) uf[i] := v
     f()
 
 fun part2'(): _ maybe<(int, int)>
@@ -84,9 +84,7 @@ fun part2'(): _ maybe<(int, int)>
     val [up, left, right, down] = list(0, 3).map fn(i) n * n + i
     var m := vector(n * n, False)
     run-union-find(4 + n * n)
-        fun same-side(x, y) parent(x) == parent(y)
-        fun closed()
-            same-side(up, left) || same-side(down, right) || same-side(left, right) || same-side(up, down)
+        fun connected(x, y) parent(x) == parent(y)            
         find(ps) fn((x, y))
             val k = x * n + y
             if x == 0 then merge(k, left)
@@ -96,9 +94,8 @@ fun part2'(): _ maybe<(int, int)>
             for(-1, 1) fn(dx) for(-1, 1) fn(dy)
                 val (x', y') = (x + dx, y + dy)
                 if x' >= 0 && x' < n && y' >= 0 && y' < n && m[x' * n + y'] then merge(k, x' * n + y')
-                ()
             m[k] := True
-            closed()         
+            connected(up, left) || connected(down, right) || connected(left, right) || connected(up, down)       
 
 pub fun main()
     with input-full
