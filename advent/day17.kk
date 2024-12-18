@@ -45,12 +45,12 @@ fun read-inp()
     val insts = instr-str.slice.drop(9).string.split(",").filter-map fn(x) x.parse-int
     (regs, insts)
 
-fun exec(regs, is): <pure, write> regs
+fun exec(regs, is): <div, write> regs
     val iv = is.chunks2.vector
     fun go(pr) match iv.at(pr.p.int)
         Nothing -> pr
         Just((ic, x)) -> 
-            val inst = instructions[ic]
+            val inst = instructions.at(ic).default(out)
             val r = pr(p = pr.p.inc)
             go(inst(x.int64))
     go(regs)

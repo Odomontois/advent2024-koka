@@ -133,4 +133,7 @@ pub fbip fun chunks2(xs: list<a>): list<(a, a)> match xs
     Cons(a, Cons(b, xs')) -> Cons((a, b), xs'.chunks2)
     _ -> Nil
 
+pub fun list-pair([x, y]: list<a>): exn (a, a) (x, y)
+
+
     
