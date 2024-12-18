@@ -46,6 +46,60 @@ fun fall-limit() match input()
     Sample -> 12
     Full -> 1024
 
+
+effect union-find
+    fun uf-get(i: int): int
+    fun uf-set(i: int, v: int): unit
+
+fun parent(i): <union-find, div> int
+    var p := parent
+    fun go(j) match uf-get(j)
+        x | x <= 0 -> 
+            val res = go(~x)
+            uf-set(i, ~res)
+            res
+        _ -> j
+    go(i)
+
+fun merge(i, j): _ unit
+    val pi = parent(i)
+    val pj = parent(j)
+    if pi != pj then 
+        val si = uf-get(pi)
+        val sj = uf-get(pj)
+        val (a, b) = if si <= sj then (pi, pj) else (pj, pi)
+        uf-set(a, si + sj + 1)
+        uf-set(b, ~a)
+
+fun run-union-find(n, f : () -> <union-find | e> x): e x
+    var uf := vector(n, 1)
+    with handler
+        fun uf-get(i) try(fn() uf[i]) fn(_) i  
+        fun uf-set(i, v) try(fn() uf[i] := v) fn(_) ()
+    f()
+
+fun part2'(): _ maybe<(int, int)>
+    val ps = read-pairs()
+    val n = map-size()
+    val [up, left, right, down] = list(0, 3).map fn(i) n * n + i
+    var m := vector(n * n, False)
+    run-union-find(4 + n * n)
+        fun same-side(x, y) parent(x) == parent(y)
+        fun closed()
+            same-side(up, left) || same-side(down, right) || same-side(left, right) || same-side(up, down)
+        find(ps) fn((x, y))
+            val k = x * n + y
+            if x == 0 then merge(k, left)
+            if x == n - 1 then merge(k, right)
+            if y == 0 then merge(k, up)
+            if y == n - 1 then merge(k, down)
+            for(-1, 1) fn(dx) for(-1, 1) fn(dy)
+                val (x', y') = (x + dx, y + dy)
+                if x' >= 0 && x' < n && y' >= 0 && y' < n && m[x' * n + y'] then merge(k, x' * n + y')
+                ()
+            m[k] := True
+            closed()         
+
 pub fun main()
     with input-full
-    part2()
+    println(part2'())
