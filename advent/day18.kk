@@ -81,21 +81,18 @@ fun run-union-find(n, f : () -> <union-find, exn | e> x): <exn|e> x
 fun part2'(): _ maybe<(int, int)>
     val ps = read-pairs()
     val n = map-size()
-    val [up, left, right, down] = list(0, 3).map fn(i) n * n + i
+    val (upright, downleft) = (n * n , n * n + 1)
     var m := vector(n * n, False)
-    run-union-find(4 + n * n)
-        fun connected(x, y) parent(x) == parent(y)            
+    run-union-find(n * n + 2)
         find(ps) fn((x, y))
             val k = x * n + y
-            if x == 0 then merge(k, left)
-            if x == n - 1 then merge(k, right)
-            if y == 0 then merge(k, up)
-            if y == n - 1 then merge(k, down)
+            if x == 0 || y == n - 1 then merge(k, downleft)
+            if y == 0 || x == n - 1 then merge(k, upright)
             for(-1, 1) fn(dx) for(-1, 1) fn(dy)
                 val (x', y') = (x + dx, y + dy)
                 if x' >= 0 && x' < n && y' >= 0 && y' < n && m[x' * n + y'] then merge(k, x' * n + y')
             m[k] := True
-            connected(up, left) || connected(down, right) || connected(left, right) || connected(up, down)       
+            parent(upright) == parent(downleft)     
 
 pub fun main()
     with input-full
