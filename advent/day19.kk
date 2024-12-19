@@ -19,25 +19,25 @@ fun parse-words()
 
 fun possible(words: list<string>, design: string)
     val n = design.count
-    var possible := vector(n, False)
-    possible[0] := True
-    for-while(n) fn(i)
-        if !possible[i] then return Nothing
-        foreach-while(words) fn(word)
+    var possible := vector(n + 1, 0)
+    possible[0] := 1
+    for(n) fn(i)
+        if possible[i] == 0 then return ()
+        val ways = possible[i]
+        foreach(words) fn(word)
             val s = word.count
-            if design.slice.subslice(i, i + s) != word.slice return Nothing
-            match (i + s).cmp(n)
-                Lt -> 
-                    possible[i + s] := True
-                    Nothing
-                Eq -> Just(())
-                Gt -> Nothing
-    .is-just
+            if design.slice.subslice(i, i + s) != word.slice return ()
+            if i + s <= n then possible[i + s] := possible[i + s] + ways
+    possible[n]
 
 fun part1()
     val Words(towels, designs) = parse-words()
-    designs.filter(fn(d) possible(towels, d)).length
+    designs.filter(fn(d) possible(towels, d) > 0).length
+
+fun part2()
+    val Words(towels, designs) = parse-words()
+    designs.map(fn(d) possible(towels, d)).sum
 
 pub fun main()
     with input-full
-    part1()
+    part2()
