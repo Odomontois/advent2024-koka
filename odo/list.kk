@@ -2,17 +2,17 @@ module odo/list
 
 import std/core/undiv
 
-fun merge(xs: list<a>, ys: list<a>, ?less: (a, a) -> e bool): e list<a>
+fun merge(xs: list<a>, ys: list<a>, ?(<): (a, a) -> e bool): e list<a>
     match xs
         Nil -> ys
         Cons(x, xrest) -> match ys
             Nil -> xs
             Cons(y, yrest) ->                 
-                if less(x, y) 
+                if x < y 
                 then Cons(x, merge(xrest, ys))
                 else Cons(y, merge(xs, yrest))
 
-fun merge-sort-it(xs: list<a>, ?less: (a, a) -> e bool): e list<a>
+fun merge-sort(xs: list<a>, ?(<): (a, a) -> e bool): e list<a>
     match xs
         Nil -> Nil
         Cons(_, Nil) -> xs
@@ -20,13 +20,10 @@ fun merge-sort-it(xs: list<a>, ?less: (a, a) -> e bool): e list<a>
             val mid = xs.length / 2
             val left = xs.take(mid)
             val right = xs.drop(mid)
-            merge(merge-sort-it(left.pretend-decreasing), merge-sort-it(right.pretend-decreasing))
+            merge(merge-sort(left.pretend-decreasing), merge-sort(right.pretend-decreasing))
 
-pub fun merge-sort-with(xs: list<a>, less: (a, a) -> e bool): e list<a>
-    merge-sort-it(xs)
-
-pub fun merge-sort(xs: list<a>, ?cmp: (a, a) -> e order): e list<a>
-    merge-sort-it(xs, fn(x, y) cmp(x, y) == Lt)
+pub fun merge-sort-with(xs: list<a>, (<): (a, a) -> e bool): e list<a>
+    merge-sort(xs)  
 
 pub fun transpose(xs: list<list<a>>): list<list<a>>
     match xs 
