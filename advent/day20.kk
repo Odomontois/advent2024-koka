@@ -29,7 +29,7 @@ fun for-neighbors(x: int, y: int, f: (int, int, int) -> e (), dist: int, ?dim: i
                 
 
 
-fun cheats(rt: racetrack, ?max-dist: int)
+fun cheats(rt: racetrack, ?max-dist: int): pure list<(int, int)>
     val dim = rt.length
     var d := vector(dim * dim, 1_000_000_000)
     var late := vector(dim * dim, 0)
@@ -51,14 +51,7 @@ fun cheats(rt: racetrack, ?max-dist: int)
     
     val last = last-mut
     var results := vector(last, 0) 
-    var seen := vector(dim * dim, False)
-    fun seek(x, y, rest)
-        val k = x * dim + y
-        if seen[k] then return ()
-        seen[k] := True
-        for-neighbors(x, y, dist = rest) fn(i, j, u)
-            if rt[i][j] == '#' then seek(i, j, rest - u)
-        seen[k] := False
+
     foreach-indexed(rt) fn(i, v)
         foreach-indexed(v) fn(j, c)
             if c == '#' then return ()
