@@ -15,13 +15,21 @@ fun neighbors(x: int, y: int, ?dim: int): list<(int, int)>
     [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)].filter fn((i, j)) 
         i >= 0 && j >= 0 && i < dim && j < dim
 
-fun neighbors2(x: int, y: int, ?dim: int): list<(int, int)>
-    [(0, 2), (1, 1)].flatmap fn((da, db))
-        [(x + da, y + db), (x + db, y - da), (x - da, y - db), (x - db, y + db)].filter fn((i, j))
-            i >= 0 && j >= 0 && i < dim && j < dim
+fun for-neighbors(x: int, y: int, f: (int, int, int) -> e (), dist: int, ?dim: int): e ()
+    fun neighbor(a, b, d) if a >= 0 && b >= 0 && a < dim && b < dim then f(a, b, d)
+
+    for(dist) fn(t)
+        val t' = t + 1
+        for(t') fn(i)
+            val j = t + 1 - i
+            neighbor(x + i, y + j, t')
+            neighbor(x + j, y - i, t')
+            neighbor(x - i, y - j, t')
+            neighbor(x - j, y + i, t')
+                
 
 
-fun cheats(rt: racetrack)
+fun cheats(rt: racetrack, ?max-dist: int)
     val dim = rt.length
     var d := vector(dim * dim, 1_000_000_000)
     var late := vector(dim * dim, 0)
@@ -36,35 +44,45 @@ fun cheats(rt: racetrack)
     while-just(fn () q.dequeue()) fn (((x, y, w), q'))
         q := q'
         last-mut := w
-        foreach(neighbors(x, y)) fn((i, j))
+        for-neighbors(x, y, dist = 1) fn (i, j, _)
             val k = i * dim + j
-            if rt[i][j] == '#' && d[k] > w + 1 then d[k] := w + 1
-            if d[k] <= w + 1 || rt[i][j] == '#' then return ()
-            d[k] := w + 1
-            q := q.enqueue((i, j, w + 1))
-            ()
+            if d[k] > w + 1 then d[k] := w + 1 else return ()
+            if rt[i][j] != '#' then q := q.enqueue((i, j, w + 1))
     
     val last = last-mut
     var results := vector(last, 0) 
+    var seen := vector(dim * dim, False)
+    fun seek(x, y, rest)
+        val k = x * dim + y
+        if seen[k] then return ()
+        seen[k] := True
+        for-neighbors(x, y, dist = rest) fn(i, j, u)
+            if rt[i][j] == '#' then seek(i, j, rest - u)
+        seen[k] := False
     foreach-indexed(rt) fn(i, v)
         foreach-indexed(v) fn(j, c)
-            if c != '#' then return()
+            if c == '#' then return ()
             val begin = d[i * dim + j]
-            foreach(neighbors(i, j)) fn((x, y))
+            for-neighbors(i, j, dist = max-dist) fn(x, y, u)
                 if rt[x][y] == '#' then return()
                 val finish = d[x * dim + y]
-                val dif = finish - begin - 1    
+                val dif = finish - begin - u    
+
                 if dif > 0 then results[dif] := results[dif] + 1
 
     results.list.map-indexed(fn (i, v) if v > 0 then [(i, v)] else []).flatmap(id)
 
 
-fun part1()
+fun solve(?max-dist: int)
     val rt = read-racetrack()
-    rt.cheats()
+    val x = rt.cheats()
+    // println(x)
+    println(x.filter-map(fn ((i, v)) whether(i >= 100){v}).sum)
 
     
 pub fun main()
-  with input-full
-  part1().filter-map(fn ((i, v)) whether(i >= 100){v}).sum
-  .println
+    // for-neighbors(100, 100, ?dist = 3, ?dim = 1000) fn (i: int, j: int)
+    //     println((i, j))
+    
+    with input-full
+    solve(?max-dist = 20)
