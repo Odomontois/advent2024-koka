@@ -16,16 +16,16 @@ fun neighbors(x: int, y: int, ?dim: int): list<(int, int)>
         i >= 0 && j >= 0 && i < dim && j < dim
 
 fun for-neighbors(x: int, y: int, f: (int, int, int) -> e (), dist: int, ?dim: int): e ()
-    fun neighbor(a, b, d) if a >= 0 && b >= 0 && a < dim && b < dim then f(a, b, d)
+    fun neighbor(a, b, ?d) if a >= 0 && b >= 0 && a < dim && b < dim then f(a, b, d)
 
     for(dist) fn(t)
-        val t' = t + 1
-        for(t') fn(i)
-            val j = t + 1 - i
-            neighbor(x + i, y + j, t')
-            neighbor(x + j, y - i, t')
-            neighbor(x - i, y - j, t')
-            neighbor(x - j, y + i, t')
+        val d = t + 1
+        for(d) fn(i)
+            val j = d - i
+            neighbor(x + i, y + j)
+            neighbor(x + j, y - i)
+            neighbor(x - i, y - j)
+            neighbor(x - j, y + i)
                 
 
 
@@ -76,13 +76,10 @@ fun cheats(rt: racetrack, ?max-dist: int)
 fun solve(?max-dist: int)
     val rt = read-racetrack()
     val x = rt.cheats()
-    // println(x)
     println(x.filter-map(fn ((i, v)) whether(i >= 100){v}).sum)
 
     
 pub fun main()
-    // for-neighbors(100, 100, ?dist = 3, ?dim = 1000) fn (i: int, j: int)
-    //     println((i, j))
-    
     with input-full
+    solve(?max-dist = 2)
     solve(?max-dist = 20)
