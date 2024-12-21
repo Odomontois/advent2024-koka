@@ -6,6 +6,8 @@ import odo/choice
 
 fun sequences() read-input(21).split("\n")
 
+alias pad = char -> (int, int)
+
 fun numeric(c): total _ match c
     '7' -> (0, 0)
     '8' -> (1, 0)
@@ -28,61 +30,83 @@ fun directional(c): total _ match c
     '>' -> (2, 1)
     _   -> (0, 0)
 
+fun dir-index(c): total _ match c
+    'A' -> 0
+    '^' -> 1
+    '<' -> 2
+    'v' -> 3
+    '>' -> 4
+    _   -> -1000
+
+fun index-dir(c): total _ match c
+    0 -> 'A'
+    1 -> '^'
+    2 -> '<'
+    3 -> 'v'
+    4 -> '>'
+    _ -> ' '
+
+alias cost-matrix = vector<vector<int>>
+
+
+fun cost-of(from: char, to: char, ?costs: cost-matrix): int
+    with final ctl throw-exn(e) -10000000000
+    costs[dir-index(from)][dir-index(to)]
+
+val initial-cost-matrix: cost-matrix = vector(5, vector(5, 1))
+
+fun calculate-cost(moves: string, ?costs: cost-matrix): int
+    moves.list.foldl((0, 'A'), fn ((acc, prev), c) (acc + cost-of(prev, c), c)).fst
+
 fun one-dir-move(d, cn, cp)
     (if d < 0 then cn else cp).repeat(abs(d))
 
-fun move(dx, dy, gap-warning: bool) 
-    val xmove = one-dir-move(dx, "<", ">")
-    val ymove = one-dir-move(dy, "^", "v")
-    if !gap-warning
-    then xmove ++ ymove ++ "A"
-    else ymove ++ xmove ++ "A"
-
-fun hv-move(px, py, x, y) 
-    ((x, y), one-dir-move(x - px, "<", ">") ++ one-dir-move(y - py, "^", "v") ++ "A")
-
-fun vh-move(x, y, px, py) 
-    (one-dir-move(y - py, "^", "v") ++ one-dir-move(x - px, "<", ">") ++ "A", (x, y), )
-
-fun translate(s: string, pad: char -> (int, int)): string
+fun move-cost(from: char, to: char, ?pad: pad, ?costs: cost-matrix): int
+    val (fx, fy) = pad(from)
+    val (tx, ty) = pad(to)
     val (gx, gy) = pad(' ')
-    s.list.map(pad).foldl(("", pad('A'))) fn ((acc, (px, py)), (x, y))
-        val gap-warning = (py == gy) && (x == gx) 
-        (acc ++ move(x - px, y - py, gap-warning), (x, y))
-    .fst
+    val gap-x = (fy == gy) && (tx == gx) 
+    val gap-y = (fx == gx) && (ty == gy)
+    val hmove = one-dir-move(tx - fx, "<", ">")
+    val vmove = one-dir-move(ty - fy, "^", "v")
+    val hv = calculate-cost(hmove ++ vmove ++ "A")
+    val vh = calculate-cost(vmove ++ hmove ++ "A")
+    if gap-y then hv else if gap-x then vh else hv.min(vh)
 
-fun translate-c(s: string, pad: char -> (int, int)): choice string
-    val (gx, gy) = pad(' ')
-    s.list.map(pad).foldl((Nil, pad('A'))) fn ((acc, (px, py)), (x, y))
-        val gap-x = (py == gy) && (x == gx) 
-        val gap-y = (px == gx) && (y == gy)
-        val hv = one-dir-move(x - px, "<", ">") ++ one-dir-move(y - py, "^", "v") ++ "A"
-        val vh = one-dir-move(y - py, "^", "v") ++ one-dir-move(x - px, "<", ">") ++ "A"
-        val hv-res = (Cons(hv, acc), (x, y))
-        val vh-res = (Cons(vh, acc), (x, y))
-        if gap-y || y == py then hv-res
-        else if gap-x || x == px then vh-res
-        else if choice() then hv-res else vh-res
-    .fst.join
+fun next-cost-matrix(prev: cost-matrix): cost-matrix
+    vector-init(5) fn(i)
+        vector-init(5) fn(j)
+            move-cost(from = index-dir(i), to = index-dir(j), ?pad = directional, ?costs = prev)
 
-fun trans2(s: string) s.translate(numeric).translate(directional).translate(directional)
-fun trans2-c(s: string) 
-    fun look()
-        val r = s.translate-c(numeric).translate-c(directional).translate-c(directional)
-        (r, r.count)
-    choice/fold(look) fn (p1 as (_, c1), p2 as (_, c2)) if c1 < c2 then p1 else p2 
+fun calculate-num-cost(num: string, pad: pad, ?costs: cost-matrix): int
+    num.list.foldl((0, 'A'), fn ((acc, prev), c) (acc + move-cost(prev, c), c)).fst
 
+fun cost-matrix-degree(?degree: int): cost-matrix
+    list(1, degree).foldl(initial-cost-matrix, fn(prev, _) next-cost-matrix(prev))
 
+fun print-cost-matrix(?degree: int)
+    println("=======[" ++ degree.show ++ "]=======")
+    val costs = cost-matrix-degree()
+    costs.foreach-indexed fn (i, row)
+        row.foreach-indexed fn (j, cost)
+            println((index-dir(i), index-dir(j), cost))
 
-fun part1() 
-    sequences().map fn(s)
-        val (t, c) = s.trans2-c
-        val d = s.replace-all("A", "").parse-int.default(0)
-        println(s ++ "  " ++ t ++ " :" ++  c.show ++ "," ++ d.show)
-        t.count * d
+fun solve(?degree: int): <input, io> int
+    val ?costs = cost-matrix-degree()
+    sequences().map fn(num) 
+        val cost = calculate-num-cost(num, numeric)
+        val d = num.replace-all("A", "").parse-int().default(0)
+        println((num, cost, d))
+        cost * d
     .sum
 
 
+
 pub fun main()
+    // print-cost-matrix(0)
+    // print-cost-matrix(1)
+    // println(move-cost('A', '^', ))
+    // print-cost-matrix(2)
     with input-full
-    part1()
+    println(solve(2))
+    println(solve(25))
