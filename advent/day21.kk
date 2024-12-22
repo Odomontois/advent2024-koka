@@ -84,13 +84,6 @@ fun calculate-num-cost(num: string, pad: pad, ?costs: cost-matrix): int
 fun cost-matrix-degree(?degree: int): cost-matrix
     list(1, degree).foldl(initial-cost-matrix, fn(prev, _) next-cost-matrix(prev))
 
-fun print-cost-matrix(?degree: int)
-    println("=======[" ++ degree.show ++ "]=======")
-    val costs = cost-matrix-degree()
-    costs.foreach-indexed fn (i, row)
-        row.foreach-indexed fn (j, cost)
-            println((index-dir(i), index-dir(j), cost))
-
 fun solve(?degree: int): <input, io> int
     val ?costs = cost-matrix-degree()
     sequences().map fn(num) 
@@ -103,10 +96,6 @@ fun solve(?degree: int): <input, io> int
 
 
 pub fun main()
-    // print-cost-matrix(0)
-    // print-cost-matrix(1)
-    // println(move-cost('A', '^', ))
-    // print-cost-matrix(2)
     with input-full
     println(solve(2))
     println(solve(25))
