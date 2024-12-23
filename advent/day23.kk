@@ -35,6 +35,9 @@ fun make-graph(pairs: list<(string, string)>): pure graph
         connect(ai, bi)
         connect(bi, ai)
     val connects = connections
+    for(676) fn(i)
+        val v = vertices[i]
+        vertices[i] := vertices[i](connected = v.connected.merge-sort)
     
     Graph(vertices, fn(a, b) connects.at(a * 676 + b) == Just(True))
 
@@ -54,6 +57,41 @@ fun part1()
         .ignore 
     res
 
+value struct clique
+    vertices: list<int>
+    connected: list<int>
+
+fun cliques1(g: graph): pure list<clique>
+    g.vertices.list.map-indexed fn (i, v) Clique([i], v.connected)
+
+fun progress(g: graph, cs: list<clique>): pure list<clique>
+    cs.flatmap fn(c)
+        val head = c.vertices.head(0)
+        c.connected.filter(fn (i) i < head).map fn(j)
+            Clique(Cons(j, c.vertices), g.vertices[j].connected.intersect(c.connected))
+
+fun part2()
+    val g = read-graph().make-graph
+    var res := 0
+    for(676) fn(i)
+        val v = g.vertices[i]
+        map-peek(v.connected) fn(j, rest)
+            if j < i then return ()
+            foreach(rest) fn (k)
+                if k < i then return ()
+                if !(g.connected()(j, k)) then return ()
+                res := res + 1
+        .ignore 
+    res
+
+fun part2'()
+    val g = read-graph().make-graph
+    fun go(cs)
+        match g.progress(cs)
+            [Clique(vertices)] -> vertices.map(name).join(",")
+            cs' -> go(cs')
+    g.cliques1().go()
+
 pub fun main()
     with input-full
-    part1()
+    part2'()

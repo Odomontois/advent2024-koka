@@ -132,5 +132,15 @@ pub fbip fun chunks2(xs: list<a>): list<(a, a)> match xs
 
 pub fun list-pair([x, y]: list<a>): exn (a, a) (x, y)
 
+pub fun intersect(xs: list<a>, ys: list<a>, ^?cmp: (a, a) -> e order): e list<a>
+    match xs
+        Nil -> Nil
+        Cons(x, xs') -> match ys 
+            Nil -> Nil
+            Cons(y, ys') -> match cmp(x, y)
+                Lt -> xs'.intersect(ys)
+                Eq -> Cons(x, xs'.intersect(ys'))
+                Gt -> xs.intersect(ys')
+
 
     
