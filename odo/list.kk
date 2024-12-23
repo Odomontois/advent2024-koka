@@ -2,7 +2,7 @@ module odo/list
 
 import std/core/undiv
 
-fun merge(xs: list<a>, ys: list<a>, ?(<): (a, a) -> e bool): e list<a>
+pub fun merge(xs: list<a>, ys: list<a>, ?(<): (a, a) -> e bool): e list<a>
     match xs
         Nil -> ys
         Cons(x, xrest) -> match ys
@@ -12,7 +12,7 @@ fun merge(xs: list<a>, ys: list<a>, ?(<): (a, a) -> e bool): e list<a>
                 then Cons(x, merge(xrest, ys))
                 else Cons(y, merge(xs, yrest))
 
-fun merge-sort(xs: list<a>, ?(<): (a, a) -> e bool): e list<a>
+pub fun merge-sort(xs: list<a>, ?(<): (a, a) -> e bool): e list<a>
     match xs
         Nil -> Nil
         Cons(_, Nil) -> xs

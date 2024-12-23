@@ -46,12 +46,9 @@ fun part2()
         
     foreach-indexed(nums) fn(i, num)
         analyze(i, num, -1, -1, -1, num.int % 10, 0)
+        
     var best := 0
-    var k := 0
-    foreach-indexed(sums) fn(i, s)
-        if best < s then
-            best := s
-            k := i
+    foreach(sums) fn(s) best := best.max(s)
     println(best)
 
 
