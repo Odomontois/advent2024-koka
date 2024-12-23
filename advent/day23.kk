@@ -72,20 +72,6 @@ fun progress(g: graph, cs: list<clique>): pure list<clique>
 
 fun part2()
     val g = read-graph().make-graph
-    var res := 0
-    for(676) fn(i)
-        val v = g.vertices[i]
-        map-peek(v.connected) fn(j, rest)
-            if j < i then return ()
-            foreach(rest) fn (k)
-                if k < i then return ()
-                if !(g.connected()(j, k)) then return ()
-                res := res + 1
-        .ignore 
-    res
-
-fun part2'()
-    val g = read-graph().make-graph
     fun go(cs)
         match g.progress(cs)
             [Clique(vertices)] -> vertices.map(name).join(",")
@@ -94,4 +80,4 @@ fun part2'()
 
 pub fun main()
     with input-full
-    part2'()
+    part2()
