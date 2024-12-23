@@ -26,7 +26,7 @@ fun collect-list(xs: list<(int, int)>): div collected
    acc-vect.map(fn (row) row.map(fn (r) !r))
 
 fun check-seq(s: list<int>, c: collected): exn (bool, list<int>)
-    val res = s.merge-sort-with(fn (x, y) c[x][y])
+    val res = s.merge-sort(?(<) = fn (x, y) c[x][y])
     (res == s, res)
 
 fun mid(xs: list<int>) xs.at(xs.length / 2).default(-1)

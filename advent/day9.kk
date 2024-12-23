@@ -76,7 +76,7 @@ fun defragment(fs: list<file>)
                     f(pos = p)
                 _ -> f
 
-    fs.reverse.map(place).merge-sort-with fn (f1, f2) f1.pos < f2.pos
+    fs.reverse.map(place).merge-sort(?(<) = fn (f1, f2) f1.pos < f2.pos)
 
 fun part2()
     read-input(9).files.defragment.checksum

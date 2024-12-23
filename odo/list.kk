@@ -22,9 +22,6 @@ pub fun merge-sort(xs: list<a>, ?(<): (a, a) -> e bool): e list<a>
             val right = xs.drop(mid)
             merge(merge-sort(left.pretend-decreasing), merge-sort(right.pretend-decreasing))
 
-pub fun merge-sort-with(xs: list<a>, (<): (a, a) -> e bool): e list<a>
-    merge-sort(xs)  
-
 pub fun transpose(xs: list<list<a>>): list<list<a>>
     match xs 
         Nil -> Nil

@@ -3,7 +3,6 @@ module advent/day20
 import advent/input
 import odo/queue
 import odo/maybe
-import std/data/hashmap
 
 
 alias racetrack = vector<vector<char>>
